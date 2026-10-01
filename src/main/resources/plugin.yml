@@ -1,0 +1,15 @@
+name: 'KeepSystemOn'
+main: 'it.vinche.keepsystemon.KeepSystemOn'
+version: '1.0.0'
+api-version: '26.3'
+
+commands:
+    inhibit:
+        description: Keep the system awake.
+        usage: /inhibit <on|off>
+
+
+permissions:
+    keep-system-on.inhibit:
+        description: Allows the player to use the /inhibit command.
+        default: op
