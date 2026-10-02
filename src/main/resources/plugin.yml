@@ -6,7 +6,7 @@ api-version: '26.3'
 commands:
     inhibit:
         description: Keep the system awake.
-        usage: /inhibit <on|off>
+        usage: /inhibit <on|off|auto>
 
 
 permissions:

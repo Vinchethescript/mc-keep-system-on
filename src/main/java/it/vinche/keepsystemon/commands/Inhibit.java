@@ -50,8 +50,10 @@ public class Inhibit implements TabExecutor {
                     sender.sendMessage("Released inhibition. Shutdown and sleep are now allowed.");
                 } else if (args[0].equalsIgnoreCase("auto")) {
                     plugin.inhibitMode = KeepSystemOn.InhibitWhen.ACTIVE;
-                    plugin.autoInhibit();
                     sender.sendMessage("Inhibition will now be automatically enabled when players are online.");
+                    if (!plugin.autoInhibit()) {
+                        sender.sendMessage("§cFailed to enable inhibition. Check the server logs for details.");
+                    }
                 } else {
                     return false;
                 }
@@ -67,6 +69,8 @@ public class Inhibit implements TabExecutor {
             if (sender instanceof Player) {
                 sender.sendMessage("§cAn error occurred while executing the command. Check the server logs for details.");
             }
+            plugin.getLogger().severe("An error occurred while executing the /inhibit command: " + e.getMessage());
+            e.printStackTrace();
         }
         return true;
     }

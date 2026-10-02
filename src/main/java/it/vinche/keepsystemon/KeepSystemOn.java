@@ -44,8 +44,9 @@ public class KeepSystemOn extends JavaPlugin implements Listener {
         }
 
         if (inhibitMode == InhibitWhen.ALWAYS) {
-            doInhibit();
-            getLogger().info("Plugin enabled and inhibiting sleep/shutdown now.");
+            if (doInhibit()) {
+                getLogger().info("Plugin enabled and inhibiting sleep/shutdown now.");
+            }
         } else if (inhibitMode == InhibitWhen.ACTIVE) {
             getLogger().info("Plugin enabled and inhibiting sleep/shutdown when players are online.");
             autoInhibit();
@@ -65,22 +66,26 @@ public class KeepSystemOn extends JavaPlugin implements Listener {
         return ret;
     }
 
-    public void doInhibit() {
+    public boolean doInhibit() {
         try {
             inhibitor.inhibit(getInhibitReason());
         } catch (Exception e) {
             getLogger().severe("Failed to enable inhibition: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
-    public void unInhibit() {
+    public boolean unInhibit() {
         try {
             inhibitor.unhibit();
         } catch (Exception e) {
             getLogger().severe("Failed to disable inhibition: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     @Override
@@ -89,15 +94,16 @@ public class KeepSystemOn extends JavaPlugin implements Listener {
         unInhibit();
     }
 
-    public void autoInhibit() {
+    public boolean autoInhibit() {
         if (inhibitMode == InhibitWhen.ACTIVE) {
             if (getServer().getOnlinePlayers().size() > 0) {
                 // this will either acquire the inhibition or change the reason for the player count 
-                doInhibit();
+                return doInhibit();
             } else {
-                unInhibit();
+                return unInhibit();
             }
         }
+        return true;
     }
 
     @EventHandler

@@ -13,7 +13,7 @@ class BusInstance {
     private static DBusConnection instance;
 
     public static DBusConnection getInstance() throws Exception {
-        if (instance == null) {
+        if (instance == null || !instance.isConnected()) {
             instance = DBusConnectionBuilder.forSystemBus().build();
         }
 
@@ -44,7 +44,16 @@ public class SystemdInhibitor implements Inhibitor {
         if (isInhibited()) {
             // close the old inhibitor before replacing
             // this can be used to change the reason
-            unhibit();
+            try {
+                unhibit();
+            } catch (Exception e) {
+                FileDescriptorCast
+                    .unsafeUsing(fd.getIntFileDescriptor())
+                    .as(OutputStream.class)
+                    .close();
+
+                throw e;
+            }
         }
         inhibitorFd = fd;
     }
@@ -69,4 +78,8 @@ public class SystemdInhibitor implements Inhibitor {
         return inhibitorFd != null && inhibitorFd.getIntFileDescriptor() != -1;
     }
     
+    public void close() throws Exception {
+        unhibit();
+        BusInstance.getInstance().close();
+    }
 }
