@@ -56,10 +56,11 @@ public class Inhibit implements TabExecutor {
                     return false;
                 }
             } else {
+                String autoStatus = plugin.inhibitMode == KeepSystemOn.InhibitWhen.ACTIVE ? "(automatic)" : "";
                 if (inhibitor.isInhibited()) {
-                    sender.sendMessage("Inhibition is currently enabled. The system will not sleep or shutdown.");
+                    sender.sendMessage("Inhibition is currently enabled. The system will not sleep or shutdown." + autoStatus);
                 } else {
-                    sender.sendMessage("Inhibition is currently disabled.");
+                    sender.sendMessage("Inhibition is currently disabled." + autoStatus);
                 }
             }
         } catch (Exception e) {
