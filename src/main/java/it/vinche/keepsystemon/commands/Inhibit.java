@@ -38,11 +38,12 @@ public class Inhibit implements TabExecutor {
             return true;
         }
 
+        var oldMode = plugin.inhibitMode;
         try {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("on")) {
-                    inhibitor.inhibit(plugin.getInhibitReason());
                     plugin.inhibitMode = KeepSystemOn.InhibitWhen.ALWAYS;
+                    inhibitor.inhibit(plugin.getInhibitReason());
                     sender.sendMessage("Shutdown and sleep are now locked.");
                 } else if (args[0].equalsIgnoreCase("off")) {
                     inhibitor.unhibit();
@@ -69,6 +70,7 @@ public class Inhibit implements TabExecutor {
             if (sender instanceof Player) {
                 sender.sendMessage("§cAn error occurred while executing the command. Check the server logs for details.");
             }
+            plugin.inhibitMode = oldMode;
             plugin.getLogger().severe("An error occurred while executing the /inhibit command: " + e.getMessage());
             e.printStackTrace();
         }

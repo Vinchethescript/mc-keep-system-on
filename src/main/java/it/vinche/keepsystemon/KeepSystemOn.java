@@ -36,11 +36,12 @@ public class KeepSystemOn extends JavaPlugin implements Listener {
         this.getCommand("inhibit").setExecutor(new Inhibit(inhibitor, this));
         
         if (config.getString("inhibit").equalsIgnoreCase("when-active")) {
-            inhibitMode = InhibitWhen.ACTIVE;
-        } else if (config.getBoolean("inhibit")) {
-            inhibitMode = InhibitWhen.ALWAYS;
+            inhibitMode = InhibitWhen.ACTIVE; 
+        } else if (config.isBoolean("inhibit")) {
+            inhibitMode = config.getBoolean("inhibit") ? InhibitWhen.ALWAYS : InhibitWhen.NEVER;
         } else {
-            inhibitMode = InhibitWhen.NEVER;
+            getLogger().warning("Invalid value for 'inhibit' in config.yml. Defaulting to 'when-active'.");
+            inhibitMode = InhibitWhen.ACTIVE;
         }
 
         if (inhibitMode == InhibitWhen.ALWAYS) {
@@ -91,12 +92,7 @@ public class KeepSystemOn extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         getLogger().info("Plugin disabled, releasing sleep/shutdown inhibition.");
-        try {
-            inhibitor.unhibit();
-        } catch (Exception e) {
-            getLogger().severe("Failed to disable inhibition: " + e.getMessage());
-            e.printStackTrace();
-        }
+        unInhibit();
     }
 
     public boolean autoInhibit() {
