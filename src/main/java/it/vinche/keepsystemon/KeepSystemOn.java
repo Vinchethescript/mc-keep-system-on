@@ -91,7 +91,12 @@ public class KeepSystemOn extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         getLogger().info("Plugin disabled, releasing sleep/shutdown inhibition.");
-        unInhibit();
+        try {
+            inhibitor.unhibit();
+        } catch (Exception e) {
+            getLogger().severe("Failed to disable inhibition: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public boolean autoInhibit() {
