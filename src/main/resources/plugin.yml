@@ -1,6 +1,6 @@
 name: 'KeepSystemOn'
 main: 'it.vinche.keepsystemon.KeepSystemOn'
-version: '1.0.0'
+version: '0.1.0'
 api-version: '26.3'
 
 commands:

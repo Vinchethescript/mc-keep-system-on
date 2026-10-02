@@ -1,7 +1,7 @@
 package it.vinche.keepsystemon.inhibitors;
 
 public interface Inhibitor {
-    public boolean inhibit(String reason);
-    public boolean unhibit(); // haha get it
+    public void inhibit(String reason) throws Exception;
+    public void unhibit() throws Exception; // haha get it
     public boolean isInhibited();
 }

@@ -11,15 +11,16 @@ import it.vinche.keepsystemon.commands.Inhibit;
 import it.vinche.keepsystemon.inhibitors.Inhibitor;
 import it.vinche.keepsystemon.inhibitors.SystemdInhibitor;
 
-enum InhibitWhen {
-    ALWAYS,
-    ACTIVE,
-    NEVER;
-}
 
 public class KeepSystemOn extends JavaPlugin implements Listener {
+    public enum InhibitWhen {
+        ALWAYS,
+        ACTIVE,
+        NEVER;
+    }
+
     FileConfiguration config = getConfig();
-    InhibitWhen inhibitMode;
+    public InhibitWhen inhibitMode;
 
     private Inhibitor inhibitor;
 
@@ -43,15 +44,15 @@ public class KeepSystemOn extends JavaPlugin implements Listener {
         }
 
         if (inhibitMode == InhibitWhen.ALWAYS) {
+            doInhibit();
             getLogger().info("Plugin enabled and inhibiting sleep/shutdown now.");
-            inhibitor.inhibit(getInhibitReason());
         } else if (inhibitMode == InhibitWhen.ACTIVE) {
             getLogger().info("Plugin enabled and inhibiting sleep/shutdown when players are online.");
-            getServer().getPluginManager().registerEvents(this, this);
             autoInhibit();
         } else {
             getLogger().info("Plugin enabled and inhibiting sleep/shutdown when /inhibit is used.");
         }
+        getServer().getPluginManager().registerEvents(this, this);
     }
 
     public String getInhibitReason() {
@@ -64,23 +65,37 @@ public class KeepSystemOn extends JavaPlugin implements Listener {
         return ret;
     }
 
-    @Override
-    public void onDisable() {
-        getLogger().info("Plugin disabled, releasing sleep/shutdown inhibition.");
-        if (inhibitor.isInhibited()) {
-            inhibitor.unhibit();
+    public void doInhibit() {
+        try {
+            inhibitor.inhibit(getInhibitReason());
+        } catch (Exception e) {
+            getLogger().severe("Failed to enable inhibition: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private void autoInhibit() {
+    public void unInhibit() {
+        try {
+            inhibitor.unhibit();
+        } catch (Exception e) {
+            getLogger().severe("Failed to disable inhibition: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        getLogger().info("Plugin disabled, releasing sleep/shutdown inhibition.");
+        unInhibit();
+    }
+
+    public void autoInhibit() {
         if (inhibitMode == InhibitWhen.ACTIVE) {
             if (getServer().getOnlinePlayers().size() > 0) {
                 // this will either acquire the inhibition or change the reason for the player count 
-                inhibitor.inhibit(getInhibitReason());
+                doInhibit();
             } else {
-                if (inhibitor.isInhibited()) {
-                    inhibitor.unhibit();
-                }
+                unInhibit();
             }
         }
     }

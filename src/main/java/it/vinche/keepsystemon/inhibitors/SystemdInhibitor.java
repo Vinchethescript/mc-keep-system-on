@@ -31,52 +31,37 @@ public class SystemdInhibitor implements Inhibitor {
     }
 
     @Override
-    public boolean inhibit(String reason) {
-        try {
-            var manager = BusInstance.getInstance().getRemoteObject(
-                "org.freedesktop.login1",
-                "/org/freedesktop/login1",
-                Manager.class
-            );
+    public void inhibit(String reason) throws Exception {
+        var manager = BusInstance.getInstance().getRemoteObject(
+            "org.freedesktop.login1",
+            "/org/freedesktop/login1",
+            Manager.class
+        );
 
-            var fd = manager.Inhibit(
-                "sleep:idle:shutdown", "Minecraft Server", reason, "block"
-            );
-            if (isInhibited()) {
-                // close the old inhibitor before replacing
-                // this can be used to change the reason
-                unhibit();
-            }
-            inhibitorFd = fd;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (isInhibited()) {
-                unhibit();
-            }
-            inhibitorFd = null; // make sure this stays null
-            return false;
+        var fd = manager.Inhibit(
+            "sleep:idle:shutdown", "Minecraft Server", reason, "block"
+        );
+        if (isInhibited()) {
+            // close the old inhibitor before replacing
+            // this can be used to change the reason
+            unhibit();
         }
-
-        return true;
+        inhibitorFd = fd;
     }
 
     @Override
-    public boolean unhibit() {
+    public void unhibit() throws Exception {
         if (!isInhibited()) {
-            return false;
+            return;
         }
         try {
             FileDescriptorCast
                 .unsafeUsing(inhibitorFd.getIntFileDescriptor())
                 .as(OutputStream.class)
                 .close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+        } finally {
+            inhibitorFd = null;
         }
-        inhibitorFd = null;
-        return true;
     }
 
     @Override
